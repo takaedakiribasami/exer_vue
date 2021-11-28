@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>vue.js</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <label><input type="checkbox" v-model="myAgree">同意します</label>
+        <button v-bind:disabled="myAgree==false">送信</button>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                myAgree: false
+            }
+        });
+    </script>
+</body>
+
+</html>

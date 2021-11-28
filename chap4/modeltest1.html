@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>vue.js</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <input v-model="myName" placeholder="お名前">
+        <p>私は{{ myName }}です。</p>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                myName: ''
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>vue.js</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <select v-model="myColor" multiple style="width: 150px">
+            <option disabled value="">色を選んでください</option>
+            <option>red</option>
+            <option>green</option>
+            <option>blue</option>
+            <option>orange</option>
+            <option>brown</option>
+        </select>
+        <p>選択された色：{{myColor}}</p>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                myColor: []
+            }
+        });
+    </script>
+</body>
+
+</html>
