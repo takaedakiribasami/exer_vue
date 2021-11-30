@@ -17,7 +17,10 @@
             </label>
         </div>
         <p>{{ remaining }}/{{ todos.length }}件処理</p>
-        <p><input type="text" v-model.trim="addText" v-on:keyup.enter="addTodo" placeholder="すること"></p>
+        <p>
+            <input type="text" v-model.trim="addText" v-on:keyup.enter="addTodo" placeholder="todo">
+            <button v-on:click="addTodo">追加</button>
+        </p>
         <p><button v-on:click="cleanTodo">処理済のtodoを削除</button></p>
     </div>
     <script>
