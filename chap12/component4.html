@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>vue.js</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <my-component v-for="(item,index) in myArray" v-bind:my-info="item"></my-component>
+    </div>
+    <script>
+        var MyComponent = {
+            template: '<p class="my-comp">私は{{ myInfo.name }}、{{ myInfo.age }}歳です</p>',
+            props: {
+                myInfo: Object
+            },
+            created: function () {
+                if (this.myInfo == null) {
+                    this.myInfo.name = "名無しの権兵衛";
+                    this.myInfo.age = "？";
+                }
+            }
+        }
+        new Vue({
+            el: "#app",
+            data: {
+                myArray: [
+                    { name: '桃太郎', age: '15' },
+                    { name: '浦島太郎', age: '14' },
+                    { name: '金太郎', age: '13' },
+                    { name: '三年寝太郎', age: '18' }
+                ]
+            },
+            components: {
+                'my-component': MyComponent
+            }
+        })
+    </script>
+    <style>
+        .my-comp {
+            width: 300px;
+            background-color: #ffffe0;
+            border: solid;
+            border-color: darkorange;
+            border-radius: 8px;
+            padding: 8px;
+        }
+    </style>
+</body>
+
+</html>
