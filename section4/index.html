@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>vue.js SPA sample</title>
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router@2.0.0/dist/vue-router.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <nav>
+            <router-link to="/top">トップページ</router-link>
+            <router-link to="/users">ユーザー一覧ページ</router-link>
+            <router-link to="/users/new?redirect=true">ユーザー登録ページ</router-link>
+            <router-link to="/login" v-show="!Auth.loggedIn()">ログイン</router-link>
+            <router-link to="/logout" v-show="Auth.loggedIn()">ログアウト</router-link>
+        </nav>
+        <router-view></router-view>
+    </div>
+    <!-- ユーザー一覧 -->
+    <script type="text/x-template" id="user-list">
+        <div>
+            <div class="loading" v-if="loading">読み込み中...</div>
+            <div v-if="error" class="error">
+                {{ error }}
+            </div>
+            <div v-for="user in users" :key="user.id">
+                <h2>{{ user.name }}</h2>
+            </div>
+        </div>
+    </script>
+    <!-- ユーザー詳細 -->
+    <script type="text/x-template" id="user-detail">
+        <div>
+            <div class="loading" v-if="loading">読み込み中...</div>
+            <div v-if="error" class="error">
+                {{ error }}
+            </div>
+            <div v-if="user">
+                <h2>{{ user.name }}</h2>
+                <p>{{ user.description }}</p>
+            </div>
+        </div>
+    </script>
+    <!-- ユーザー登録 -->
+    <script type="text/x-template" id="user-create">
+        <div>
+            <div class="sending" v-if="sending">sending...</div>
+            <div>
+                <h2>新規ユーザー作成</h2>
+                <div>
+                    <label>名前: </label>
+                    <input type="text" v-model="user.name">
+                </div>
+                <div>
+                    <label>説明文: </label>
+                    <textarea v-model="user.description"></textarea>
+                </div>
+                <div v-if="error" class="error">
+                    {{ error }}
+                </div>
+                <div>
+                    <input type="button" @click="createUser" value="送信">
+                </div>
+            </div>
+        </div>
+    </script>
+    <!-- ログイン -->
+    <script type="text/x-template" id="login">
+        <div>
+            <h2>Login</h2>
+            <p v-if="$route.query.redirect">ログインしてください。</p>
+            <form @submit.prevent="login">
+                <label><input v-model="email" placeholder="email"></label>
+                <label><input v-model="pass" placeholder="password" type="password" ></label>
+                <br>
+                <button type="submit">ログイン</button>
+                <p v-if="error" class="error">ログインに失敗しました。</p>
+            </form>
+        </div>
+    </script>
+
+    <script>
+        // ユーザーデータ
+        var userData = [
+            {
+                id: 1,
+                name: 'Takuya Tejima',
+                description: '東南アジアで働くエンジニアです。'
+            },
+            {
+                id: 2,
+                name: 'Yohei Noda',
+                description: 'アウトドア、フットサルが趣味のエンジニアです。'
+            }
+        ]
+
+        // ユーザー取得用モック
+        var getUser = function (userId, callback) {
+            setTimeout(function () {
+                var filteredUsers = userData.filter(function (user) {
+                    return user.id === parseInt(userId, 10)
+                })
+                callback(null, filteredUsers && filteredUsers[0])
+            }, 1000)
+        }
+
+        // ユーザー一覧取得用モック
+        var getUsers = function (callback) {
+            setTimeout(function () {
+                callback(null, userData)
+            }, 1000)
+        }
+
+        // ユーザー登録用モック
+        var postUser = function (params, callback) {
+            setTimeout(function () {
+                params.id = userData.length + 1
+                userData.push(params)
+                callback(null, params)
+            }, 1000)
+        }
+
+        // ユーザー認証用モック
+        var Auth = {
+            login: function (email, pass, cb) {
+                setTimeout(function () {
+                    if (email === 'vue@example.com' && pass === 'vue') {
+                        localStorage.token = Math.random().toString(36).substring(7)
+                        if (cb) { cb(true) }
+                    } else {
+                        if (cb) { cb(false) }
+                    }
+                }, 0)
+            },
+            logout: function () {
+                delete localStorage.token
+            },
+            loggedIn: function () {
+                return localStorage.token
+            }
+        }
+
+        // ログインコンポーネント
+        var Login = {
+            template: '#login',
+            data: function () {
+                return {
+                    email: 'vue@example.com',
+                    pass: '',
+                    error: false
+                }
+            },
+            methods: {
+                login: function () {
+                    Auth.login(this.email, this.pass, (function (loggedIn) {
+                        if (!loggedIn) {
+                            this.error = true
+                        } else {
+                            this.$router.replace(this.$route.query.redirect || '/')
+                        }
+                    }).bind(this))
+                }
+            }
+        }
+
+        // 新規ユーザー作成コンポーネント
+        var UserCreate = {
+            template: '#user-create',
+            data: function () {
+                return {
+                    sending: false,
+                    user: this.defaultUser(),
+                    error: null
+                }
+            },
+            created: function () {
+            },
+            methods: {
+                defaultUser: function () {
+                    return {
+                        name: '',
+                        description: ''
+                    }
+                },
+                createUser: function () {
+                    if (this.user.name.trim() === '') {
+                        this.error = 'Nameは必須です'
+                        return
+                    }
+                    if (this.user.description.trim() === '') {
+                        this.error = 'Descriptionは必須です'
+                        return
+                    }
+                    postUser(this.user, (function (err, user) {
+                        this.sending = false
+                        if (err) {
+                            this.error = err.toString()
+                        } else {
+                            this.error = null
+                            this.user = this.defaultUser()
+                            alert('新規ユーザーが登録されました')
+                            this.$router.push('/users')
+                        }
+                    }).bind(this))
+                }
+            }
+        }
+
+        // ユーザー一覧コンポーネント
+        var UserList = {
+            template: '#user-list',
+            data: function () {
+                return {
+                    loading: false,
+                    users: function () { return [] },
+                    error: null
+                }
+            },
+            created: function () {
+                this.fetchData()
+            },
+            watch: {
+                '$route': 'fetchData'
+            },
+            methods: {
+                fetchData: function () {
+                    this.loading = true
+                    getUsers((function (err, users) {
+                        this.loading = false
+                        if (err) {
+                            this.error = err.toString()
+                        } else {
+                            this.users = users
+                        }
+                    }).bind(this))
+                }
+            }
+        }
+
+        // ユーザー詳細コンポーネント
+        var UserDetail = {
+            template: '#user-detail',
+            data: function () {
+                return {
+                    loading: false,
+                    user: null,
+                    error: null
+                }
+            },
+            created: function () {
+                this.fetchData()
+            },
+            watch: {
+                '$route': 'fetchData'
+            },
+            methods: {
+                fetchData: function () {
+                    this.loading = true
+                    getUser(this.$route.params.userId, (function (err, user) {
+                        this.loading = false
+                        if (err) {
+                            this.error = err.toString()
+                        } else {
+                            this.user = user
+                        }
+                    }).bind(this))
+                }
+            }
+        }
+
+
+        // ルーティング設定
+        var router = new VueRouter({
+            routes: [
+                {
+                    path: '/top',
+                    component: {
+                        template: '<div>トップページです。</div>'
+                    }
+                },
+                {
+                    path: '/users',
+                    component: UserList
+                },
+                {
+                    path: '/users/new',
+                    component: UserCreate,
+                    beforeEnter: function (to, from, next) {
+                        if (!Auth.loggedIn()) {
+                            next({
+                                path: '/login',
+                                query: { rediret: to.fullPath }
+                            })
+                        } else {
+                            next()
+                        }
+                    }
+                },
+                {
+                    path: '/users/:userId',
+                    component: UserDetail
+                },
+                {
+                    path: '/login',
+                    component: Login
+                },
+                {
+                    path: '/logout',
+                    beforeEnter: function (to, from, next) {
+                        Auth.logout()
+                        next('/')
+                    }
+                }
+            ]
+        })
+
+        var app = new Vue({
+            data: {
+                Auth: Auth
+            },
+            router: router
+        }).$mount('#app')
+    </script>
+</body>
+
+</html>
