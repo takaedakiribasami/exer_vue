@@ -1,9 +1,11 @@
-import Vue from 'vue'
+import { createApp, h } from 'vue'
 import App from './App.vue'
 import store from './store'
 
-new Vue({
-    el: '#app',
-    store,
-    render: h = h(App)
+const app = createApp({
+    render() {
+        return h(App);
+    }
 })
+app.use(store)
+app.mount('#app')
