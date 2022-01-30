@@ -5,7 +5,7 @@
     type="button"
     @click="handleClick"
   >
-    <slot />
+    <slot></slot>
   </button>
 </template>
 
@@ -25,7 +25,7 @@ export default {
   computed: {
     classes() {
       const cls = this.type === "text" ? "-" + this.type : "";
-      return ["kbn-button$(cls)"];
+      return [`kbn-button${cls}`];
     },
   },
   methods: {
